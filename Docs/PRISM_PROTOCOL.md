@@ -69,6 +69,11 @@ Formats:
 > simply treated as an unsigned number during transformation.  Input may be
 > provided as the numeric array or as raw bytes (or hex string when
 > `bytes` format is selected).
+>
+> **Note on `rfc3339` output:** When `target_format` is `rfc3339`, the first
+> element of a `unixXX` payload is interpreted as UTC seconds since epoch
+> and formatted as RFC‑3339 with explicit `+00:00` UTC offset. No local
+> timezone conversion is performed.
 
 Missing or unknown format values cause `error_code 3`.
 
@@ -102,8 +107,8 @@ scalar string.  The returned JSON field is always `value_<target_format>`.
 String outputs:
 - `hex`       → raw bytes as lower‑case hex string
 - `base64`    → raw bytes as base64
-- `rfc3339`   → standard RFC‑3339 timestamp (only when input is
-                interpreted as `time.Time`)
+- `rfc3339`   → standard RFC‑3339 timestamp in **UTC** (only when input is
+                interpreted as unix seconds). Always `+00:00` or `Z` timezone.
 
 Examples (success):
 
