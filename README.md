@@ -34,11 +34,17 @@ Response:
 
 Request:
 
+```json
 { "payload_format": "bytes", "target_format": "u16be", "payload_hex": "42F6E666" }
+```
 
 Response:
 
+```json
 { "value_u16be": [17142, 58982] }
+```
+
+(you can also supply numeric arrays directly: `payload_u16` : [17142,58982])
 
 ------------------------------------------------------------------------
 
