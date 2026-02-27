@@ -14,6 +14,14 @@ import (
 // a normalized internal value. The returned interface{} may be one of
 // []byte, []uint64, []int64, []float64, or string depending on the format.
 func Decode(format string, data []byte) (interface{}, error) {
+    // normalize Unix aliases to their numeric counterparts preserving endian
+    if strings.HasPrefix(format, "unix32") {
+        format = "u32" + format[len("unix32"):]
+    }
+    if strings.HasPrefix(format, "unix64") {
+        format = "u64" + format[len("unix64"):]
+    }
+
     switch format {
     case "bytes":
         return data, nil
@@ -72,7 +80,7 @@ func Decode(format string, data []byte) (interface{}, error) {
             out[i] = int64(v)
         }
         return out, nil
-    case "u32be", "u32le", "unix32be", "unix32le":
+    case "u32be", "u32le":
         if len(data)%4 != 0 {
             return nil, ErrorCode(errors.CodeLengthMismatch)
         }
@@ -87,7 +95,7 @@ func Decode(format string, data []byte) (interface{}, error) {
             }
         }
         return out, nil
-    case "i64be", "i64le", "unix64be", "unix64le":
+    case "i64be", "i64le":
         if len(data)%8 != 0 {
             return nil, ErrorCode(errors.CodeLengthMismatch)
         }

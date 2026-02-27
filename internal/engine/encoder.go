@@ -66,9 +66,21 @@ func Process(req *protocol.Request) ([]byte, error) {
 		return json.Marshal(map[string]int{"error_code": int(code)})
 	}
 
-	// if target is a string format operating on bytes we may already have
-	// the raw data packaged above.  otherwise we attempt to convert the
-	// internal value via Decode (rules repeated from earlier code).
+    // if the client requested rfc3339 we treat unix* numeric values as
+    // seconds since epoch and produce a time.Time in UTC.  no timezone logic or
+    // validation is performed (see protocol docs).
+    if req.TargetFormat == "rfc3339" {
+        switch v := internal.(type) {
+        case []uint64:
+            if strings.HasPrefix(req.PayloadFormat, "unix") && len(v) > 0 {
+                internal = time.Unix(int64(v[0]), 0).UTC()
+            }
+        case []int64:
+            if strings.HasPrefix(req.PayloadFormat, "unix") && len(v) > 0 {
+                internal = time.Unix(v[0], 0).UTC()
+            }
+        }
+    }
 	var out interface{}
 	var err error
 	if req.TargetFormat == "hex" || req.TargetFormat == "base64" {

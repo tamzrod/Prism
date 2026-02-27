@@ -4,6 +4,7 @@ package engine
 
 import (
     "encoding/hex"
+    "fmt"
     "testing"
 )
 
@@ -61,5 +62,35 @@ func TestEncode_Base64(t *testing.T) {
     }
     if out.(string) == "" {
         t.Error("empty base64 output")
+    }
+}
+
+func TestDecode_Unix32Alias(t *testing.T) {
+    data := []byte{0x01, 0x02, 0x03, 0x04}
+    u32, err := Decode("u32be", data)
+    if err != nil {
+        t.Fatal(err)
+    }
+    unix, err := Decode("unix32be", data)
+    if err != nil {
+        t.Fatal(err)
+    }
+    if fmt.Sprintf("%v", u32) != fmt.Sprintf("%v", unix) {
+        t.Errorf("unix32be alias mismatch: %v vs %v", u32, unix)
+    }
+}
+
+func TestDecode_Unix64Alias(t *testing.T) {
+    data := []byte{0x00, 0x00, 0x00, 0x00, 0xDE, 0xAD, 0xBE, 0xEF}
+    u64, err := Decode("u64le", data)
+    if err != nil {
+        t.Fatal(err)
+    }
+    unix, err := Decode("unix64le", data)
+    if err != nil {
+        t.Fatal(err)
+    }
+    if fmt.Sprintf("%v", u64) != fmt.Sprintf("%v", unix) {
+        t.Errorf("unix64le alias mismatch: %v vs %v", u64, unix)
     }
 }

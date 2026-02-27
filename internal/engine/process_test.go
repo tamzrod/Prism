@@ -141,3 +141,53 @@ func TestProcess_PayloadFormatHexAlias(t *testing.T) {
         }
     }
 }
+
+func TestProcess_Unix32ToRFC3339(t *testing.T) {
+    // choose a known timestamp, e.g. 0x5E2D0BDC = 1581231230 -> 2020-02-09T...
+    payload := []uint64{1581231230}
+    req := &protocol.Request{
+        PayloadFormat: "unix32be",
+        TargetFormat:  "rfc3339",
+        PayloadU32:    &payload,
+    }
+    resp, err := Process(req)
+    if err != nil {
+        t.Fatalf("process error: %v", err)
+    }
+    var res map[string]interface{}
+    if err := json.Unmarshal(resp, &res); err != nil {
+        t.Fatalf("unmarshal response: %v", err)
+    }
+    if str, ok := res["value_rfc3339"]; !ok {
+        t.Errorf("expected rfc3339 value, got %v", res)
+    } else {
+        // just ensure it's a nonempty string
+        if str.(string) == "" {
+            t.Error("empty rfc3339 output")
+        }
+    }
+}
+
+func TestProcess_Unix64ToRFC3339(t *testing.T) {
+    payload := []uint64{1581231230}
+    req := &protocol.Request{
+        PayloadFormat: "unix64le",
+        TargetFormat:  "rfc3339",
+        PayloadU64:    &payload,
+    }
+    resp, err := Process(req)
+    if err != nil {
+        t.Fatalf("process error: %v", err)
+    }
+    var res map[string]interface{}
+    if err := json.Unmarshal(resp, &res); err != nil {
+        t.Fatalf("unmarshal response: %v", err)
+    }
+    if str, ok := res["value_rfc3339"]; !ok {
+        t.Errorf("expected rfc3339 value, got %v", res)
+    } else {
+        if str.(string) == "" {
+            t.Error("empty rfc3339 output")
+        }
+    }
+}
